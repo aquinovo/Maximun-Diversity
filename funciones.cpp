@@ -28,10 +28,10 @@ int armonia_menor(vector<float> valores_memoria);
 int armonia_mayor(vector<float> valores_memoria);
 
 // funciones usados para el algoritmo genetico
-vector < vector <bool>  > poblacion(int m,int n,int Tm);
+vector < vector <bool>  > poblacion_inicial(int m,int n,int Tm);
 vector<float> poblacion_heuristica(vector < vector <bool>  > soluciones,map<int, map<int,float> > datos);
 vector < vector <bool>  > torneo(vector < vector <bool>  > poblacion, vector<float> heuristica, float porcentaje);
-vector < vector <bool>  > cruzamineto (vector <bool> padre1,vector <bool> padre2,int m);
+vector < vector <bool>  > cruzamiento (vector <bool> padre1,vector <bool> padre2,int m);
 vector <bool> eliminar_agregar_unos(vector <bool> hijo1,int m);
 int num_unos(vector <bool> hijo);
 
@@ -173,7 +173,7 @@ int armonia_mayor(vector<float> valores_memoria){
 //********************************************************************************************************
 
 //funcion que inicializa la poblacion inicial
-vector < vector <bool>  > poblacion(int m,int n,int Tm){
+vector < vector <bool>  > poblacion_inicial(int m,int n,int Tm){
     vector < vector <bool> >soluciones(Tm);
     for (int i = 0; i < Tm; i++){
       soluciones[i]=crear_solucion(m,n);
@@ -213,7 +213,7 @@ vector < vector <bool>  > torneo(vector < vector <bool>  > poblacion, vector<flo
     return seleccionados; 
 }
 
-vector < vector <bool>  > cruzamineto (vector <bool> padre1,vector <bool> padre2,int m){
+vector < vector <bool>  > cruzamiento (vector <bool> padre1,vector <bool> padre2,int m){
   vector < vector <bool> >hijos(2,vector<bool>(padre1.size()));
   for (int i = 0; i < padre1.size(); i++){
        if(i <= padre1.size()/2){
@@ -224,7 +224,6 @@ vector < vector <bool>  > cruzamineto (vector <bool> padre1,vector <bool> padre2
         hijos[1][i]=padre1[i]; 
        }
   }
-  cout<<padre1.size() <<" -- "<<hijos[0].size()<<endl; 
   hijos[0]=eliminar_agregar_unos(hijos[0],m);
   hijos[1]=eliminar_agregar_unos(hijos[1],m);
 
