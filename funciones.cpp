@@ -27,6 +27,14 @@ vector<float> iniciar_valores_memoria(vector < vector <bool>  > memoria,map<int,
 int armonia_menor(vector<float> valores_memoria);
 int armonia_mayor(vector<float> valores_memoria);
 
+// funciones usados para el algoritmo genetico
+vector < vector <bool>  > poblacion(int m,int n,int Tm);
+vector<float> poblacion_heuristica(vector < vector <bool>  > soluciones,map<int, map<int,float> > datos);
+vector < vector <bool>  > torneo(vector < vector <bool>  > poblacion, vector<float> heuristica, float porcentaje);
+vector < vector <bool>  > cruzamineto (vector <bool> padre1,vector <bool> padre2,int m);
+vector <bool> eliminar_agregar_unos(vector <bool> hijo1,int m);
+int num_unos(vector <bool> hijo);
+
 //diferencia en tiempos de reloj
 double timeval_diff(struct timeval *a, struct timeval *b);
 
@@ -52,7 +60,7 @@ float valor_solucion(vector <bool> solucion,map<int, map<int,float> > datos){
 
    for (int i = 0; i < solucion.size(); i++)
       if(solucion[i]==1)
-         soluciones.push_back(i+1);
+         soluciones.push_back(i);
 
    for (int i = 0; i < soluciones.size()-1; i++)
       for (int j = i+1; j < soluciones.size(); j++)
@@ -161,6 +169,99 @@ int armonia_mayor(vector<float> valores_memoria){
         
    return indice;
 }
+
+//********************************************************************************************************
+
+//funcion que inicializa la poblacion inicial
+vector < vector <bool>  > poblacion(int m,int n,int Tm){
+    vector < vector <bool> >soluciones(Tm);
+    for (int i = 0; i < Tm; i++){
+      soluciones[i]=crear_solucion(m,n);
+    }
+    return soluciones;
+}
+//funcion para obtener las heuristicas de la poblacion
+vector<float> poblacion_heuristica(vector < vector <bool>  > soluciones,map<int, map<int,float> > datos){
+   vector<float> heuristica_solucion(soluciones.size());
+    
+    for (int i = 0; i < soluciones.size(); i++){
+      heuristica_solucion[i]=valor_solucion(soluciones[i],datos);
+    }
+
+   return heuristica_solucion;
+}
+//torneo para seleccionar a los candidatos que se cruzarán
+vector < vector <bool>  > torneo(vector < vector <bool>  > poblacion, vector<float> heuristica, float porcentaje){
+    int n=poblacion.size()*porcentaje;
+    vector < vector <bool> >seleccionados(0);
+    
+    while(seleccionados.size()<n){
+      int candidato1= rand() % poblacion.size();
+      int candidato2= rand() % poblacion.size();
+
+      if(heuristica[candidato1]>=heuristica[candidato2]){
+        seleccionados.push_back(poblacion[candidato1]);
+        poblacion.erase(poblacion.begin()+candidato1);
+        heuristica.erase(heuristica.begin()+candidato1);
+      }
+      else{
+        seleccionados.push_back(poblacion[candidato2]);
+        poblacion.erase(poblacion.begin()+candidato2);
+        heuristica.erase(heuristica.begin()+candidato2);
+      }
+    }
+    return seleccionados; 
+}
+
+vector < vector <bool>  > cruzamineto (vector <bool> padre1,vector <bool> padre2,int m){
+  vector < vector <bool> >hijos(2,vector<bool>(padre1.size()));
+  for (int i = 0; i < padre1.size(); i++){
+       if(i <= padre1.size()/2){
+        hijos[0][i]=padre1[i];
+        hijos[1][i]=padre2[i]; 
+       }else{
+        hijos[0][i]=padre2[i];
+        hijos[1][i]=padre1[i]; 
+       }
+  }
+  cout<<padre1.size() <<" -- "<<hijos[0].size()<<endl; 
+  hijos[0]=eliminar_agregar_unos(hijos[0],m);
+  hijos[1]=eliminar_agregar_unos(hijos[1],m);
+
+  return hijos;
+}
+
+vector <bool> eliminar_agregar_unos(vector <bool> hijo,int m){
+  vector <bool> hijo_nuevo=hijo;
+  int posicion;
+  posicion= rand()%hijo_nuevo.size();
+  while(num_unos(hijo_nuevo)>m){
+    if(hijo_nuevo[posicion]==1)
+      hijo_nuevo[posicion]=0;
+    posicion= rand()%hijo_nuevo.size();
+  }
+
+  while(num_unos(hijo_nuevo)<m){
+    if(hijo_nuevo[posicion]==0)
+      hijo_nuevo[posicion]=1;
+    posicion= rand()%hijo_nuevo.size();
+  }
+  return hijo_nuevo;
+}
+
+int num_unos(vector <bool> hijo){
+  int cont=0;
+  for (int i = 0; i < hijo.size(); ++i){
+    if(hijo[i]==1)
+      cont++;
+  }
+  return cont;
+}
+
+
+
+
+//***********************************************************************************************************
 
 /* retorna "a - b" en segundos */
 double timeval_diff(struct timeval *a, struct timeval *b){
