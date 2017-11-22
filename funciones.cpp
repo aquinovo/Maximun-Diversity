@@ -32,8 +32,10 @@ vector < vector <bool>  > poblacion_inicial(int m,int n,int Tm);
 vector<float> poblacion_heuristica(vector < vector <bool>  > soluciones,map<int, map<int,float> > datos);
 vector < vector <bool>  > torneo(vector < vector <bool>  > poblacion, vector<float> heuristica, float porcentaje);
 vector < vector <bool>  > cruzamiento (vector <bool> padre1,vector <bool> padre2,int m);
-vector <bool> eliminar_agregar_unos(vector <bool> hijo1,int m);
+vector <bool> eliminar_agregar_unos(vector <bool> hijo1,vector <bool> padre,int m);
 int num_unos(vector <bool> hijo);
+int menor(vector<float> valores_memoria);
+int mayor(vector<float> valores_memoria);
 
 //diferencia en tiempos de reloj
 double timeval_diff(struct timeval *a, struct timeval *b);
@@ -224,13 +226,13 @@ vector < vector <bool>  > cruzamiento (vector <bool> padre1,vector <bool> padre2
         hijos[1][i]=padre1[i]; 
        }
   }
-  hijos[0]=eliminar_agregar_unos(hijos[0],m);
-  hijos[1]=eliminar_agregar_unos(hijos[1],m);
+  hijos[0]=eliminar_agregar_unos(hijos[0],padre2,m);
+  hijos[1]=eliminar_agregar_unos(hijos[1],padre2,m);
 
   return hijos;
 }
 
-vector <bool> eliminar_agregar_unos(vector <bool> hijo,int m){
+vector <bool> eliminar_agregar_unos(vector <bool> hijo,vector <bool> padre,int m){
   vector <bool> hijo_nuevo=hijo;
   int posicion;
   posicion= rand()%hijo_nuevo.size();
@@ -239,11 +241,12 @@ vector <bool> eliminar_agregar_unos(vector <bool> hijo,int m){
       hijo_nuevo[posicion]=0;
     posicion= rand()%hijo_nuevo.size();
   }
-
+  
+  posicion=0;
   while(num_unos(hijo_nuevo)<m){
-    if(hijo_nuevo[posicion]==0)
-      hijo_nuevo[posicion]=1;
-    posicion= rand()%hijo_nuevo.size();
+    if(padre[posicion]==1)
+      hijo_nuevo[posicion]=1; 
+    posicion++;
   }
   return hijo_nuevo;
 }
@@ -256,7 +259,34 @@ int num_unos(vector <bool> hijo){
   }
   return cont;
 }
+//funcion que determina la solucion con menor valor
+int menor(vector<float> valores_memoria){
+   int indice=0;
+    float menor=valores_memoria[0];
 
+    for (int i = 1; i < valores_memoria.size(); i++){
+      if(valores_memoria[i]<menor){
+            menor=valores_memoria[i];
+            indice=i; 
+      }
+    }
+        
+   return indice;
+}
+//funcion que determina la solucion con mayor valor
+int mayor(vector<float> valores_memoria){
+   int indice=0;
+    float mayor=valores_memoria[0];
+
+    for (int i = 1; i < valores_memoria.size(); i++){
+      if(valores_memoria[i] > mayor){
+            mayor=valores_memoria[i];
+            indice=i; 
+      }
+    }
+        
+   return indice;
+}
 
 
 

@@ -2,39 +2,44 @@
 
 vector <bool> genetico( map<int, map<int,float> > datos,int m, int n,int num_poblacion,float porcentaje_seleccion,float prob_cruzamiento, float prob_mutacion, float porcentaje_gen_mutar,int numero_generaciones){
 	vector <bool> solucion;
-	vector < vector <bool>  > poblacion,seleccionados,hijos(2);
-    vector<float> heuristica;
+	vector < vector <bool>  > poblacion,seleccionados,nueva_poblacion,hijos(2);
+    vector<float> heuristica,heuristica_nueva;
     
     poblacion=poblacion_inicial(m,n,num_poblacion);
     heuristica=poblacion_heuristica(poblacion,datos);
     for (int i = 0; i < numero_generaciones; i++){
-    	vector < vector <bool>  > nueva_poblacion;
-    	seleccionados=torneo(poblacion,heuristica,porcentaje_seleccion);
-
-        while(nueva_poblacion.size()<num_poblacion ){
+		heuristica=poblacion_heuristica(poblacion,datos); 	
+        seleccionados=torneo(poblacion,heuristica,porcentaje_seleccion);
+        cout<<valor_solucion(poblacion[mayor(heuristica)],datos)<<endl;
+        while(nueva_poblacion.size()<num_poblacion ){ 
         	int seleccion1= rand() % seleccionados.size();
         	int seleccion2= rand() % seleccionados.size();
-        	
-        	if(rand() % 100 < prob_cruzamiento*100 && nueva_poblacion.size()<num_poblacion-1 ){
+        	if(rand() % 100 < prob_cruzamiento*100 ){
         	    hijos=cruzamiento (seleccionados[seleccion1],seleccionados[seleccion2], m);
         	    nueva_poblacion.push_back(hijos[0]); 
         		nueva_poblacion.push_back(hijos[1]); 
 
-        	}
-        	
-        	if(rand() % 100 < prob_mutacion*100 && nueva_poblacion.size()<num_poblacion ){
-                hijos[0]=crear_vecino(seleccionados[seleccion1],n,porcentaje_gen_mutar);   
-                nueva_poblacion.push_back(hijos[0]);
-        	}
-        	
-        	if(rand() % 100 < prob_mutacion*100 && nueva_poblacion.size()<num_poblacion ){
-                hijos[1]=crear_vecino(seleccionados[seleccion2],n,porcentaje_gen_mutar);
-                nueva_poblacion.push_back(hijos[1]);   
-        	}
+        	}       	
         }
+
+        for (int j = 0; j < nueva_poblacion.size(); j++){
+            if(rand() % 100 < prob_mutacion*100){
+                hijos[0]=crear_vecino(nueva_poblacion[j],n,porcentaje_gen_mutar);   
+                nueva_poblacion[j]=hijos[0];
+            }
+        }
+        cout<<"Geracion"<<i+1<<endl;
+        int pos_mejor=mayor(heuristica);
+        heuristica_nueva=poblacion_heuristica(nueva_poblacion,datos);  
+        
+        int pos_peor=menor(heuristica_nueva);
+        nueva_poblacion[pos_peor]=poblacion[pos_mejor];
+        
         poblacion=nueva_poblacion;
+        nueva_poblacion.clear();
     }
-	return poblacion[armonia_mayor(heuristica)];
+    heuristica=poblacion_heuristica(poblacion,datos); 
+	return poblacion[mayor(heuristica)];
 }
 
 
@@ -65,15 +70,15 @@ int main() {
 	vector <bool>solucion (n);
     //Guardar solucion en archivo csv
 	ofstream ficheroSalida;
-	ficheroSalida.open ("salida/recocido.csv");
+	ficheroSalida.open ("salida/genetico.csv");
 	ficheroSalida << "Tiempo,Solución"<<endl; 
     
-    int num_poblacion=280; 
-    float porcentaje_seleccion=0.8;
-    float prob_cruzamiento=0.7;
-    float prob_mutacion=0.15;
-    float porcentaje_gen_mutar=0.05;
-    int numero_generaciones=15;
+    int num_poblacion=100; 
+    float porcentaje_seleccion=0.6;
+    float prob_cruzamiento=0.75;
+    float prob_mutacion=0.28;
+    float porcentaje_gen_mutar=0.15;
+    int numero_generaciones=100;
  
   
     solucion=genetico(datos,m,n,num_poblacion, porcentaje_seleccion,prob_cruzamiento,prob_mutacion,porcentaje_gen_mutar,numero_generaciones);
