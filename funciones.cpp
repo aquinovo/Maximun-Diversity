@@ -45,7 +45,7 @@ double timeval_diff(struct timeval *a, struct timeval *b);
 vector <bool> crear_solucion(int m,int n){
    int posicion;
    vector <bool>solucion (n);
-
+   
    for(int i=0;i<m;i++){ 
       posicion= rand()%n; 
       while(solucion[posicion]==1)
@@ -185,7 +185,6 @@ vector < vector <bool>  > poblacion_inicial(int m,int n,int Tm){
 //funcion para obtener las heuristicas de la poblacion
 vector<float> poblacion_heuristica(vector < vector <bool>  > soluciones,map<int, map<int,float> > datos){
    vector<float> heuristica_solucion(soluciones.size());
-    
     for (int i = 0; i < soluciones.size(); i++){
       heuristica_solucion[i]=valor_solucion(soluciones[i],datos);
     }

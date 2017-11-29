@@ -4,22 +4,21 @@ vector <bool> genetico( map<int, map<int,float> > datos,int m, int n,int num_pob
 	vector <bool> solucion;
 	vector < vector <bool>  > poblacion,seleccionados,nueva_poblacion,hijos(2);
     vector<float> heuristica,heuristica_nueva;
-    
+
     poblacion=poblacion_inicial(m,n,num_poblacion);
     heuristica=poblacion_heuristica(poblacion,datos);
+    cout<<"Nueva ejecución"<<endl; 
     for (int i = 0; i < numero_generaciones; i++){
-		heuristica=poblacion_heuristica(poblacion,datos); 	
+        heuristica=poblacion_heuristica(poblacion,datos); 	
         seleccionados=torneo(poblacion,heuristica,porcentaje_seleccion);
-        cout<<valor_solucion(poblacion[mayor(heuristica)],datos)<<endl;
         while(nueva_poblacion.size()<num_poblacion ){ 
-        	int seleccion1= rand() % seleccionados.size();
-        	int seleccion2= rand() % seleccionados.size();
-        	if(rand() % 100 < prob_cruzamiento*100 ){
-        	    hijos=cruzamiento (seleccionados[seleccion1],seleccionados[seleccion2], m);
-        	    nueva_poblacion.push_back(hijos[0]); 
-        		nueva_poblacion.push_back(hijos[1]); 
-
-        	}       	
+            int seleccion1= rand() % seleccionados.size();
+            int seleccion2= rand() % seleccionados.size();
+            if(rand() % 100 < prob_cruzamiento*100 ){
+                hijos=cruzamiento (seleccionados[seleccion1],seleccionados[seleccion2], m);
+                nueva_poblacion.push_back(hijos[0]); 
+                nueva_poblacion.push_back(hijos[1]); 
+            }       	
         }
 
         for (int j = 0; j < nueva_poblacion.size(); j++){
@@ -28,18 +27,19 @@ vector <bool> genetico( map<int, map<int,float> > datos,int m, int n,int num_pob
                 nueva_poblacion[j]=hijos[0];
             }
         }
-        cout<<"Geracion"<<i+1<<endl;
+
         int pos_mejor=mayor(heuristica);
         heuristica_nueva=poblacion_heuristica(nueva_poblacion,datos);  
-        
+
         int pos_peor=menor(heuristica_nueva);
         nueva_poblacion[pos_peor]=poblacion[pos_mejor];
-        
+
         poblacion=nueva_poblacion;
         nueva_poblacion.clear();
     }
+
     heuristica=poblacion_heuristica(poblacion,datos); 
-	return poblacion[mayor(heuristica)];
+    return poblacion[mayor(heuristica)];
 }
 
 
@@ -72,25 +72,58 @@ int main() {
 	ofstream ficheroSalida;
 	ficheroSalida.open ("salida/genetico.csv");
 	ficheroSalida << "Tiempo,Solución"<<endl; 
-    
-    int num_poblacion=100; 
-    float porcentaje_seleccion=0.6;
-    float prob_cruzamiento=0.75;
-    float prob_mutacion=0.28;
-    float porcentaje_gen_mutar=0.15;
-    int numero_generaciones=100;
- 
-  
-    solucion=genetico(datos,m,n,num_poblacion, porcentaje_seleccion,prob_cruzamiento,prob_mutacion,porcentaje_gen_mutar,numero_generaciones);
-	float valorsolucion=valor_solucion(solucion,datos);
-	cout<<" Valor de la solucion: "<<valorsolucion<<endl<<endl;
 
-    for (int i = 0; i < solucion.size(); ++i){
-     	cout<<solucion[i]<<" ";
-     } 
-     cout<<endl<<endl;
-	ficheroSalida.close();
-	return 0;
+
+    //numero de poblacion 
+    int num_poblacion[]={100,150,300};
+    //porcentaje de poblacion
+    float porcentaje_seleccion[]={0.6,0.7,0.8};
+    //probabilidad de cruzamiento
+    float prob_cruzamiento[]={0.6,0.7,0.8};
+    //probabilidad de mutacion
+    float prob_mutacion[]={0.1,0.2,0.3};
+    //porcentajes de genes a mutar
+    float porcentaje_gen_mutar[]={0.1,0.15,0.20};
+    //porcentaje de elementos a modificar para determinar un vecino
+    int numero_generaciones[] = {200,500,1000};
+    
+
+    for (int i = 0; i < sizeof(num_poblacion)/sizeof(num_poblacion[0]); i++){
+     
+     for (int j = 0; j < sizeof(porcentaje_seleccion)/sizeof(porcentaje_seleccion[0]); j++){
+        
+        for (int k = 0; k < sizeof(prob_cruzamiento)/sizeof(prob_cruzamiento[0]); k++){
+            
+            for (int l = 0; l < sizeof(prob_mutacion)/sizeof(prob_mutacion[0]); l++){
+                
+                for (int p = 0; p < sizeof(porcentaje_gen_mutar)/sizeof(porcentaje_gen_mutar[0]); p++){
+                
+                    for (int q = 0; q < sizeof(numero_generaciones)/sizeof(numero_generaciones[0]); q++){
+                      
+                        for (int o = 0; o<5; o++){
+                           
+                            cout<<"Parametros : ( "<<num_poblacion[i]<<" , "<<porcentaje_seleccion[j]<<" , "<<prob_cruzamiento[k]<<" , "<<prob_mutacion[l]<<" , "<<porcentaje_gen_mutar[p]<<" , "<<numero_generaciones[q]<<" ) ";
+
+                            //obtener el tiempo de ejecucion del algoritmo
+                            gettimeofday(&t_ini, NULL);
+                            solucion=genetico(datos,m,n,num_poblacion[i], porcentaje_seleccion[j],prob_cruzamiento[k],prob_mutacion[l],porcentaje_gen_mutar[p],numero_generaciones[q]);
+                            gettimeofday(&t_fin, NULL); secs = timeval_diff(&t_fin, &t_ini);
+
+                            //obtener y guardar los resultados
+                            float valorsolucion=valor_solucion(solucion,datos);
+                            cout<<endl;cout<<"Tiempo: "<<secs<<" Valor de la solucion: "<<valorsolucion;
+                            ficheroSalida <<secs<<","<<valorsolucion<<endl; 
+                            cout<<endl;cout<<endl;
+
+                        }
+                    }
+                }
+            }
+        }            
+    }
+}
+ficheroSalida.close();
+return 0;
 }
 
 /*int Tm=100; 
